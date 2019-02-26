@@ -1,0 +1,22 @@
+---
+- name: MySQL - restart mysqld
+  systemd:
+    name: mysqld
+    state: restarted
+  register: handler_restarted_mysqld
+
+- name: MySQL - start mysqld
+  systemd:
+    name: mysqld
+    state: started
+    enabled: yes
+  register: handler_started_mysqld
+
+- name: MySQL - stop mysqld
+  systemd:
+    name: mysqld
+    state: stopped
+  register: handler_stopped_mysqld
+
+#  - debug:
+#      var: handler_restarted_mysqld

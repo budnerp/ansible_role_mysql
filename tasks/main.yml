@@ -1,0 +1,88 @@
+---
+  - name: MySQL - configure MySQL 5.7 repository
+    yum:
+      name: https://repo.mysql.com/yum/mysql-5.7-community/el/7/x86_64/mysql57-community-release-el7-10.noarch.rpm
+      state: present
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
+    register: mysql_result
+    until: mysql_result is success
+    retries: 3
+    delay: 5
+
+  - name: MySQL - install MySQL 5.7 server
+    yum:
+      name: mysql-community-server
+      state: present
+
+  - name: MySQL - upload MySQL 5.7 custom setting /etc/my.cnf
+    template:
+      src: etc/my.cnf.j2
+      dest: /etc/my.cnf
+      owner: root
+      group: root
+      mode: 0644
+
+  # Reset default root password
+#  - name: MySQL - set --skip-grant-tables option
+#    shell: systemctl set-environment MYSQLD_OPTS="--skip-grant-tables "
+#    notify: MySQL - start mysqld
+#
+#  - name: MySQL - set root password
+#    shell: mysql -u root -e "UPDATE mysql.user SET authentication_string = PASSWORD('{{mysql_root_password}}') WHERE User = 'root' AND Host = 'localhost';"
+#    notify: MySQL - stop mysqld
+#
+#  - name: MySQL - set --skip-grant-tables option
+#    shell: systemctl unset-environment MYSQLD_OPTS="--skip-grant-tables "
+#    notify: MySQL - start mysqld
+  # end
+
+  - name: MySQL - install MySQL-python module
+    yum:
+      name: MySQL-python
+      state: present
+
+  - name: MySQL - enable and start MySQL 5.7 server
+    systemd:
+      name: mysqld
+      enabled: yes
+      state: started
+
+  - name: update mysql root password for all root accounts
+    mysql_user:
+      name: root
+      host: "{{item}}"
+      password: "{{mysql_root_password}}"
+    with_items:
+      - "{{ansible_nodename}}"
+      - 127.0.0.1
+      - ::1
+      - localhost
+
+  - name: MySQL - copy .my.cnf file with root password credentials for Ansible usage
+    template:
+      src: root/.my.cnf.j2
+      dest: /root/.my.cnf
+      owner: root
+      group: root
+      mode: 0600
+
+  - name: ensure anonymous users are not in the database
+    mysql_user:
+      name: ''
+      host: "{{item}}"
+      state: absent
+    with_items:
+      - "{{ansible_nodename}}"
+      - 127.0.0.1
+      - ::1
+      - localhost
+
+  - name: remove the test database
+    mysql_db:
+      name: test
+      state: absent
+
+#  - debug:
+#      var: mysql_result
+
+
