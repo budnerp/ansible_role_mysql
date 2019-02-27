@@ -13,6 +13,7 @@
     yum:
       name: mysql-community-server
       state: present
+    register: mysql_install
 
   - name: MySQL - upload MySQL 5.7 custom setting /etc/my.cnf
     template:
@@ -22,24 +23,13 @@
       group: root
       mode: 0644
 
-  # Reset default root password
-#  - name: MySQL - set --skip-grant-tables option
-#    shell: systemctl set-environment MYSQLD_OPTS="--skip-grant-tables "
-#    notify: MySQL - start mysqld
-#
-#  - name: MySQL - set root password
-#    shell: mysql -u root -e "UPDATE mysql.user SET authentication_string = PASSWORD('{{mysql_root_password}}') WHERE User = 'root' AND Host = 'localhost';"
-#    notify: MySQL - stop mysqld
-#
-#  - name: MySQL - set --skip-grant-tables option
-#    shell: systemctl unset-environment MYSQLD_OPTS="--skip-grant-tables "
-#    notify: MySQL - start mysqld
-  # end
-
-  - name: MySQL - install MySQL-python module
-    yum:
-      name: MySQL-python
-      state: present
+  - block:
+      - name: MySQL - initialize MySQL without a root password
+        command: mysqld --initialize-insecure --user=mysql
+        notify: MySQL - start mysqld
+      - name: MySQL - set root password using shell commands
+        shell: mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY '{{mysql_root_password}}'"
+    when: mysql_install.changed
 
   - name: MySQL - enable and start MySQL 5.7 server
     systemd:
@@ -47,7 +37,20 @@
       enabled: yes
       state: started
 
-  - name: update mysql root password for all root accounts
+  - name: MySQL - install MySQL-python module
+    yum:
+      name: MySQL-python
+      state: present
+
+  - name: MySQL - copy .my.cnf file with root password credentials for Ansible usage
+    template:
+      src: root/.my.cnf.j2
+      dest: /root/.my.cnf
+      owner: root
+      group: root
+      mode: 0600
+
+  - name: MySQL - update root password for all root accounts
     mysql_user:
       name: root
       host: "{{item}}"
@@ -57,14 +60,6 @@
       - 127.0.0.1
       - ::1
       - localhost
-
-  - name: MySQL - copy .my.cnf file with root password credentials for Ansible usage
-    template:
-      src: root/.my.cnf.j2
-      dest: /root/.my.cnf
-      owner: root
-      group: root
-      mode: 0600
 
   - name: ensure anonymous users are not in the database
     mysql_user:

@@ -1,3 +1,38 @@
 ---
 # Root password
 mysql_root_password: 'root'
+
+mysql_bind_address: '0.0.0.0'
+mysql_port: '3306'
+
+# This memory area is important enough that it is typically recommended that innodb_buffer_pool_size is configured
+# to 50 to 75 percent of system memory
+mysql_innodb_buffer_pool_size: "{{ (ansible_memtotal_mb*0.5*1024*1024)|int|abs }}"
+
+# The size in bytes of each log file in a log group. The combined size of log files
+# (innodb_log_file_size * innodb_log_files_in_group) cannot exceed a maximum value that is slightly less than 512GB.
+# A pair of 255 GB log files, for example, approaches the limit but does not exceed it.
+# Default value: 48MB.
+mysql_innodb_log_file_size: '256M'
+
+# The number of log files in the log group. InnoDB writes to the files in a circular fashion.
+# Default (and recommended) value: 2
+mysql_innodb_log_files_in_group: '2'
+
+# Controls the balance between strict ACID compliance for commit operations and higher performance that is possible
+# when commit-related I/O operations are rearranged and done in batches. You can achieve better performance by changing
+# the default value but then you can lose transactions in a crash.
+# Default value: 1
+mysql_innodb_flush_log_at_trx_commit: '1'
+
+# Defines the method used to flush data to InnoDB data files and log files, which can affect I/O throughput.
+# Default value: NULL
+mysql_innodb_flush_method: 'O_DIRECT'
+
+
+# To reduce overhead significantly, start the server with query_cache_type=0 if you will not be using the query cache.
+mysql_query_cache_type: 1
+
+# Size of the query cache. Setting it to 0 disables the query cache
+# By default, the query cache is disabled.
+mysql_query_cache_size: 64M

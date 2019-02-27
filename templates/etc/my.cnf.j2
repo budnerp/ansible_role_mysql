@@ -25,3 +25,16 @@ symbolic-links=0
 
 log-error=/var/log/mysqld.log
 pid-file=/var/run/mysqld/mysqld.pid
+
+bind_address={{mysql_bind_address}}
+port={{mysql_port}}
+
+innodb_buffer_pool_size = "{{mysql_innodb_buffer_pool_size}}"
+
+innodb_log_file_size = "{{mysql_innodb_log_file_size}}"
+
+innodb_flush_log_at_trx_commit = "{{mysql_innodb_flush_log_at_trx_commit}}"
+innodb_flush_method = "{{mysql_innodb_flush_method}}"
+
+query_cache_type = "{{mysql_query_cache_type}}"
+query_cache_size = "{{mysql_query_cache_size}}"
