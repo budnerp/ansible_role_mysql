@@ -7,13 +7,15 @@ Ansible role for MySQL 5.7 installation for CentOS 7
     /var/log/mysqld.log
     /etc/yum.repos.d/mysql-community.repo
     ```
-2. Custom settings as per defaults/main.yml
-3. Temporary root password is located in /var/log/mysqld.log 
+2. Custom settings as per `defaults/main.yml`
+3. Temporary root password is located in `/var/log/mysqld.log `
     ```
     sudo grep 'temporary password' /var/log/mysqld.log
     ```
-4. Updated root password: root   
+4. Updated root password: `root`
+
 ## Tested on
+mysql  Ver 14.14 Distrib 5.7.25, for Linux (x86_64) using  EditLine wrapper
 
 ## Installation
 1. Navigate to Ansible's roles folder
