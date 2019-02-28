@@ -25,8 +25,14 @@
 
   - block:
       - name: MySQL - initialize MySQL without a root password
-        command: mysqld --initialize-insecure --user=mysql
-        notify: MySQL - start mysqld
+        command: mysqld --initialize-insecure --user=mysql --explicit_defaults_for_timestamp
+
+      - name: MySQL - enable and start MySQL 5.7 server
+        systemd:
+          name: mysqld
+          enabled: yes
+          state: started
+
       - name: MySQL - set root password using shell commands
         shell: mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY '{{mysql_root_password}}'"
     when: mysql_install.changed
