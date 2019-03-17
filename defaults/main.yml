@@ -7,7 +7,8 @@ mysql_port: '3306'
 
 # This memory area is important enough that it is typically recommended that innodb_buffer_pool_size is configured
 # to 50 to 75 percent of system memory
-mysql_innodb_buffer_pool_size: "{{ (ansible_memtotal_mb*0.5*1024*1024)|int|abs }}"
+#mysql_innodb_buffer_pool_size: "{{ (ansible_memtotal_mb*0.5*1024*1024)|int|abs }}"
+mysql_innodb_buffer_pool_size: "512M"
 
 # The size in bytes of each log file in a log group. The combined size of log files
 # (innodb_log_file_size * innodb_log_files_in_group) cannot exceed a maximum value that is slightly less than 512GB.
